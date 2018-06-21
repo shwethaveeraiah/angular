@@ -46,36 +46,24 @@ jobs:
       #    name: Test
       #    command: yarn test
 
-  deploy:
+  deploy-AWS:
     docker:
-      - image: circleci/node:8.11-browsers
+      - image: circleci/python:2.7
 
     working_directory: ~/angular
 
     steps:
       - attach_workspace:
           # Must be absolute path or relative path from working_directory
-          at: ~/angular/dist
-
-      - restore_cache:
-          keys:
-          - angular-demo-dependencies-{{ checksum "yarn.lock" }}
-          # fallback to using the latest cache if no exact match is found
-          - angular-demo-dependencies-
+          at: ~/ng-ngrx-forms-demo
 
       - run:
-          name: install-dependencies
-          command: yarn install
+          name: Install AWS CLI
+          command: sudo pip install awscli
 
-      - save_cache:
-          key: angular-demo-dependencies-{{ checksum "yarn.lock" }}
-          paths:
-            - ~/.cache/yarn
-            - ./node_modules
-
-      # - run:
-      #     name: Deploy App to Firebase
-      #     command: ~/angular/node_modules/.bin/firebase deploy --token=$FIREBASE_DEPLOY_TOKEN
+      - run:
+          name: Deploy to AWS S3
+          command: aws s3 sync ~/angular/dist s3://circleciwebapptest/ --delete --acl public-read
 
 workflows:
   version: 2
