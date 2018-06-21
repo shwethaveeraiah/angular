@@ -1,4 +1,4 @@
-# Javascript Node CircleCI 2.0 configuration file
+# Javascript Angular CircleCI 2.0 configuration file
 #
 # Check https://circleci.com/docs/2.0/language-javascript/ for more details
 #
@@ -6,32 +6,85 @@ version: 2
 jobs:
   build:
     docker:
-      # specify the version you desire here
-      - image: circleci/node:7.10
-      
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/mongo:3.4.4
+      - image: circleci/node:8.11-browsers
 
-    working_directory: ~/adal-angular6-example-master
+    working_directory: ~/angular
 
     steps:
       - checkout
 
-      # Download and cache dependencies
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "package.json" }}
+          - angular-demo-dependencies-{{ checksum "yarn.lock" }}
           # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
+          - angular-demo-dependencies-
 
-      - run: yarn install
+      - run:
+          name: install-dependencies
+          command: yarn install
 
       - save_cache:
+          key: angular-demo-dependencies-{{ checksum "yarn.lock" }}
           paths:
-            - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
-        
-      # run tests!
-      - run: yarn test
+            - ~/.cache/yarn
+            - ./node_modules
+
+      - run:
+          name: Build
+          command: yarn build
+
+      - persist_to_workspace:
+          root: ~/angular
+          paths:
+            - dist
+
+      # - run:
+      #     name: Code Quality
+      #     command: yarn lint
+
+      #- run:
+      #    name: Test
+      #    command: yarn test
+
+  deploy:
+    docker:
+      - image: circleci/node:8.11-browsers
+
+    working_directory: ~/angular
+
+    steps:
+      - attach_workspace:
+          # Must be absolute path or relative path from working_directory
+          at: ~/angular/dist
+
+      - restore_cache:
+          keys:
+          - angular-demo-dependencies-{{ checksum "yarn.lock" }}
+          # fallback to using the latest cache if no exact match is found
+          - angular-demo-dependencies-
+
+      - run:
+          name: install-dependencies
+          command: yarn install
+
+      - save_cache:
+          key: angular-demo-dependencies-{{ checksum "yarn.lock" }}
+          paths:
+            - ~/.cache/yarn
+            - ./node_modules
+
+      # - run:
+      #     name: Deploy App to Firebase
+      #     command: ~/angular/node_modules/.bin/firebase deploy --token=$FIREBASE_DEPLOY_TOKEN
+
+workflows:
+  version: 2
+  build-deploy-app:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
+          filters:
+              branches:
+                only: master
