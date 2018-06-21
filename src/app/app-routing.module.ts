@@ -5,7 +5,7 @@ import { NotFoundComponent } from './not-found/not-found.component';
 import { AdalGuard } from 'adal-angular4';
 
 
-const routes: Routes = [
+let routes: Routes = [
   { path: '', component: HomeComponent, canActivate: [AdalGuard] },
   { path: '**', component: NotFoundComponent }
 
