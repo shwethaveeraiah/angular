@@ -55,7 +55,7 @@ jobs:
     steps:
       - attach_workspace:
           # Must be absolute path or relative path from working_directory
-          at: ~/ng-ngrx-forms-demo
+          at: ~/angular
 
       - run:
           name: Install AWS CLI
