@@ -38,9 +38,9 @@ jobs:
           paths:
             - dist
 
-      # - run:
-      #     name: Code Quality
-      #     command: yarn lint
+      - run:
+          name: Code Quality
+          command: yarn lint
 
       #- run:
       #    name: Test
