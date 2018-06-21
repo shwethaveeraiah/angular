@@ -70,7 +70,7 @@ workflows:
   build-deploy-app:
     jobs:
       - build
-      - deploy:
+      - deploy-AWS:
           requires:
             - build
           filters:
